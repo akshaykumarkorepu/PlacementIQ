@@ -1,0 +1,13 @@
+# PlacementIQ
+#
+# Direct project dependencies only.
+# This file is maintained manually.
+# Add a dependency only when the corresponding feature is implemented.
+#
+# Dependency policy:
+# - List only direct dependencies.
+# - Use compatible version ranges (>=,<).
+# - Do not use `pip freeze` as the source of truth.
+#
+# Phase 1:
+# No third-party runtime dependencies yet.

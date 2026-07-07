@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "placementiq"
+version = "0.1.0"
+description = "AI-powered placement intelligence platform"
+readme = "README.md"
+requires-python = ">=3.14"
