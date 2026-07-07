@@ -109,31 +109,22 @@ placementiq/
 │   ├── fixtures/                          # HTML / JSON fixtures for tests
 │   └── raw/                               # Raw HTML on disk (gitignored)
 ├── src/placementiq/
-│   ├── ingestion/
-│   │   ├── adapters/                      # one SourceAdapter per source
-│   │   ├── crawler.py
-│   │   ├── fetcher.py
-│   │   ├── parser.py
-│   │   └── rate_limit.py
-│   ├── storage/
+│   ├── agents/
+│   │   ├── ingestion/                     # deterministic: crawler, fetcher, parser, rate_limit
+│   │   │   └── adapters/                  # one SourceAdapter per source
+│   │   ├── extraction/                    # LLM-bound: extractor, validator, schema, prompt
+│   │   └── analytics/                     # router + renderer are LLM-bound; engine + confidence are SQL
+│   │       └── templates/                 # one SQL template per canonical question
+│   ├── database/                          # DB init, repositories, persistence, migrations
 │   │   ├── raw_db.py
 │   │   ├── structured_db.py
-│   │   ├── run_log.py
-│   │   └── models.py                      # Pydantic models — the cross-module type contract
-│   ├── extraction/
-│   │   ├── extractor.py
-│   │   ├── validator.py
-│   │   ├── schema.py                      # closed JSON schema
-│   │   └── prompt.py                      # versioned extraction prompt
-│   ├── analytics/
-│   │   ├── router.py
-│   │   ├── engine.py                      # canonical query templates
-│   │   ├── confidence.py
-│   │   └── templates/                     # one SQL template per canonical question
+│   │   └── run_log.py
+│   ├── models/                            # top-level shared Pydantic models — the cross-module type contract
+│   ├── pipeline/                          # one orchestrator that wires the offline stages
+│   ├── settings/                          # per-component settings modules (no global god-config)
+│   ├── common/                            # cross-cutting utilities: hashing, time, paths, exceptions
 │   ├── ui/
 │   │   └── streamlit_app.py               # thin shell — no business logic
-│   ├── pipeline/
-│   │   └── orchestrator.py
 │   └── answer.py                          # public entrypoint: answer_question(q) -> RenderedAnswer
 └── tests/
     ├── unit/
@@ -147,11 +138,17 @@ placementiq/
 
 | Module | May import from | Must NOT import from |
 |---|---|---|
-| `ingestion/*` | `storage/`, stdlib, third-party | `extraction/`, `analytics/`, `ui/` |
-| `extraction/*` | `storage/`, stdlib, LLM SDK | `ingestion/`, `analytics/`, `ui/` |
-| `analytics/*` | `storage/`, stdlib | `ingestion/`, `extraction/`, `ui/`, LLM SDK (except `Router` and `Renderer` per their spec) |
+| `agents/ingestion/*` | `database/`, `models/`, `common/`, stdlib, third-party | `agents/extraction/`, `agents/analytics/`, `ui/`, LLM SDK |
+| `agents/extraction/*` | `database/`, `models/`, `common/`, stdlib, LLM SDK | `agents/ingestion/`, `agents/analytics/`, `ui/` |
+| `agents/analytics/engine.py`, `agents/analytics/confidence.py` | `database/`, `models/`, `common/`, stdlib | `agents/ingestion/`, `agents/extraction/`, `ui/`, LLM SDK |
+| `agents/analytics/router.py`, `agents/analytics/renderer.py` | `database/`, `models/`, `common/`, stdlib, LLM SDK (via a single named seam in `settings/`) | `agents/ingestion/`, `agents/extraction/`, `ui/` |
+| `database/*` | `models/`, `common/`, stdlib, DB driver | `agents/`, `ui/` |
+| `models/*` | `common/`, stdlib | `agents/`, `database/`, `ui/`, `pipeline/`, `settings/` |
+| `pipeline/*` | any component, `common/`, stdlib | `ui/` |
+| `settings/*` | stdlib, Pydantic | any other component (leaf modules) |
+| `common/*` | stdlib | any other component |
 | `ui/*` | `answer.py` only | everything else |
-| `answer.py` | `analytics/router.py`, `analytics/engine.py`, `analytics/confidence.py`, `analytics/renderer.py` | `storage/` directly, `extraction/`, `ingestion/` |
+| `answer.py` | `agents/analytics/router.py`, `agents/analytics/engine.py`, `agents/analytics/confidence.py`, `agents/analytics/renderer.py` | `database/` directly, `agents/extraction/`, `agents/ingestion/` |
 
 Violations are caught by a Ruff config (or equivalent) and fail CI. The config is in `pyproject.toml`; it is the contract.
 
@@ -164,7 +161,7 @@ Violations are caught by a Ruff config (or equivalent) and fail CI. The config i
 - **Python 3.11+.** Use the modern type-hint syntax (`list[int]`, `X | None`).
 - **PEP 8 + Black formatting** at default settings. No bikeshedding line length.
 - **Ruff** for linting. The rules are: pycodestyle, pyflakes, isort, bugbear, security, and our custom import-direction rules.
-- **mypy** in strict mode on `src/placementiq/storage/` and `src/placementiq/analytics/`. The persistence layer and the analytics engine are the safety-critical surface; they are typed to the teeth. Other modules are typed at the public-interface level.
+- **mypy** in strict mode on `src/placementiq/database/` and `src/placementiq/agents/analytics/`. The persistence layer and the analytics engine are the safety-critical surface; they are typed to the teeth. Other modules are typed at the public-interface level.
 - **Type hints on every public function.** Private helpers may use inference; public APIs do not.
 - **Docstrings on every public module and class.** One-line summary; one-paragraph description; non-obvious behavior documented. `"""..."""` format, not `# ...`.
 - **No comments that describe what the code does.** Comments describe *why* a non-obvious decision was made. If the code is obvious, it needs no comment. If it is not obvious, the comment explains the design choice, not the syntax.
@@ -338,17 +335,17 @@ Testing is not a phase; it is part of writing the code.
 
 - **Unit tests for new logic.** Every new function gets at least one happy-path test and one failure-path test.
 - **A test for the changed component's failure modes.** A component that returns typed failures has a test for each failure type.
-- **No new raw SQL in non-storage modules.** If the PR adds SQL outside `storage/`, the test that catches it is the import-direction lint, and the PR is rejected.
+- **No new raw SQL in non-database modules.** If the PR adds SQL outside `database/`, the test that catches it is the import-direction lint, and the PR is rejected.
 - **No new live LLM calls in tests.** Tests use the mock LLM client. The end-to-end smoke test is the one exception, and it is not part of normal CI.
 
 ### Coverage targets
 
 | Module | Target |
 |---|---|
-| `src/placementiq/storage/` | ≥ 90% |
-| `src/placementiq/analytics/` | ≥ 90% |
-| `src/placementiq/extraction/` | ≥ 80% |
-| `src/placementiq/ingestion/` | ≥ 80% |
+| `src/placementiq/database/` | ≥ 90% |
+| `src/placementiq/agents/analytics/` | ≥ 90% |
+| `src/placementiq/agents/extraction/` | ≥ 80% |
+| `src/placementiq/agents/ingestion/` | ≥ 80% |
 | `src/placementiq/ui/` | ≥ 60% (UI is mostly declarative) |
 | Overall | ≥ 80% |
 
@@ -495,7 +492,7 @@ This section is for AI coding sessions. The rules here are the ones most often v
 
 ### Working in this codebase
 
-- **The directory layout is the architecture.** Putting a fetcher in `analytics/` or a SQL query in `ui/` is a code-review failure.
+- **The directory layout is the architecture.** Putting a fetcher in `agents/analytics/` or a SQL query in `ui/` is a code-review failure.
 - **The Persistence Layer is the only DB entry point.** Even in tests, even in scripts.
 - **The five canonical questions are the spec.** If a feature does not serve at least one of them, it is V2.
 - **The eval set is the contract.** The LLM's quality is measured against it. If you change the extraction schema, the eval set must be re-labeled to match.
@@ -515,7 +512,7 @@ A non-exhaustive list of patterns that look reasonable and are wrong in this cod
 | Storing raw HTML in the database | Bloats the DB; couples the storage layer to the source format. | Store raw HTML on the filesystem; store metadata in `raw_experiences`. |
 | Storing mutable raw records | Breaks immutability; breaks dedup; breaks the eval harness. | Raw records are write-once. Re-extraction creates new structured versions. |
 | Using a global config object | Makes tests non-deterministic; makes the import graph tangled. | Inject config (clock, ID generator, model name) at the call site. |
-| "Quick fix" LLM prompts in code | Prompts are versioned contracts, not strings. | Put the prompt in `extraction/prompt.py` with a `prompt_version`; load it from there. |
+| "Quick fix" LLM prompts in code | Prompts are versioned contracts, not strings. | Put the prompt in `agents/extraction/prompt.py` with a `prompt_version`; load it from there. |
 | Catching all exceptions with `except Exception` | Hides real bugs. | Catch the specific exception. Let the rest propagate. |
 | Returning `Optional[X]` when a typed failure exists | Loses the failure reason; forces callers to None-check. | Return `X \| TypedFailure`. |
 | Optimizing before measuring | Adds complexity for unmeasured gain. | Profile first. The only V1 bottleneck we expect is the LLM call, and that is bounded by cost, not by code. |

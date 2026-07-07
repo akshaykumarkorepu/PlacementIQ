@@ -390,44 +390,44 @@ Quarantine is a state, not a sink. Quarantined records are visible to operators,
 
 The directory layout *is* the architecture. If a contribution would put business logic in the wrong directory, it is rejected by code review.
 
+The package is organised around **architectural components**, not implementation stages. A single top-level `agents/` package groups the processing components; their stage-of-the-pipeline (ingestion, extraction, analytics) is expressed as a sub-package, so the LLM boundary — load-bearing for safety — remains encoded in the directory tree.
+
 ```text
 src/placementiq/
-├── ingestion/
-│   ├── adapters/          # SourceAdapter implementations (one per source)
-│   ├── crawler.py
-│   ├── fetcher.py
-│   ├── parser.py
-│   └── rate_limit.py
-├── storage/
+├── agents/
+│   ├── ingestion/         # Deterministic: crawler, fetcher, parser, rate_limit
+│   │   └── adapters/      # SourceAdapter implementations (one per source)
+│   ├── extraction/        # LLM-bound: extractor, validator, schema, prompt
+│   └── analytics/         # Router + Renderer are LLM-bound; engine + confidence are deterministic SQL
+│       └── templates/     # SQL templates, one per canonical question
+├── database/              # DB init, repositories, persistence, migrations
 │   ├── raw_db.py          # Raw DB read/write interface
 │   ├── structured_db.py   # Structured DB read/write interface
-│   ├── run_log.py         # Pipeline run metrics
-│   └── models.py          # Pydantic models shared across stages
-├── extraction/
-│   ├── extractor.py
-│   ├── validator.py
-│   ├── schema.py          # Closed JSON schema
-│   └── prompt.py          # Extraction prompt (versioned)
-├── analytics/
-│   ├── router.py
-│   ├── engine.py          # Canonical query templates
-│   ├── confidence.py
-│   └── templates/         # SQL templates, one per canonical question
-├── ui/
-│   └── streamlit_app.py   # Thin shell
-├── pipeline/
-│   └── orchestrator.py    # Wires offline stages
+│   └── run_log.py         # Pipeline run metrics
+├── models/                # Top-level shared Pydantic models — the cross-module type contract
+├── pipeline/              # One orchestrator that wires the offline stages end-to-end
+├── settings/              # Per-component settings modules (no global god-config)
+├── common/                # Cross-cutting utilities: constants, exceptions, hashing, time, paths
+└── ui/                    # Streamlit shell — no business logic
+    └── streamlit_app.py
 └── answer.py              # Public entrypoint: answer_question(q) -> RenderedAnswer
 ```
 
+**Why a flat `agents/` was rejected.** Collapsing ingestion, extraction, and analytics into a flat namespace would have erased the directory-level distinction between LLM-bound components (extractor, validator, router, renderer) and deterministic ones (crawler, fetcher, parser, analytics SQL). That distinction is structural safety, not style: the import-direction lint depends on it. The chosen layout preserves it.
+
+**Why a `services/` package was rejected.** A `services/` package without a stable, well-defined responsibility will collect miscellaneous logic within a week. Infrastructure concerns live with the component that owns them, or in a dedicated package that emerges naturally during implementation. We introduce new top-level packages only when a responsibility cannot be cleanly expressed within the existing architecture.
+
 **Boundary rules:**
 
-- `ingestion/*` never imports from `extraction/*` or `analytics/*`. It only writes to `storage/`.
-- `extraction/*` reads from `storage.raw_db`, writes to `storage.structured_db` via the structured interface.
-- `analytics/*` reads from `storage.structured_db` only. It never touches the Raw DB.
-- `ui/*` calls `answer.py`. It does not import from `analytics/`, `extraction/`, or `storage/`.
+- `agents/ingestion/*` is deterministic. It must never import the LLM SDK. It only writes to `database.raw_db`.
+- `agents/extraction/*` is LLM-bound. It reads from `database.raw_db` and writes to `database.structured_db` via the structured interface.
+- `agents/analytics/engine.py` and `agents/analytics/confidence.py` are deterministic SQL. They read from `database.structured_db` only and never touch the Raw DB. `agents/analytics/router.py` and `agents/analytics/renderer.py` are the only LLM-bound analytics components, and they import the LLM SDK through a single, named seam in `settings/` — never ad-hoc.
+- `models/*` is the top-level shared Pydantic contract. Every cross-module type is defined here, not inside the component that happens to use it. `database/` re-uses these models for typed reads/writes; it does not redefine them.
+- `pipeline/*` is the single offline orchestrator. It may import from any component but must not contain business logic itself — only stage wiring and run logging.
 - `answer.py` is the only public entrypoint of the online pipeline. It owns: Router → Analytics → Confidence → Renderer.
-- Pydantic models live in `storage/models.py` and are the cross-module type contract.
+- `ui/*` calls `answer.py`. It does not import from `agents/`, `database/`, or `models/` directly.
+- `settings/*` modules are leaf modules. They contain typed configuration objects and are imported by exactly one component. They do not import from any other component.
+- `common/*` contains cross-cutting utilities only: hashing, time, paths, exceptions, constants. It does not import from any component.
 
 A linter rule enforces these import directions. (Configuration of the linter is in `docs/CLAUDE.md` — forthcoming.)
 
@@ -575,7 +575,7 @@ The architecture is designed to scale **without redesign**. Each transition is a
 - **Workers:** the offline pipeline becomes a worker pool consuming from a job queue (e.g., a `pipeline_jobs` table with claim semantics, or an external queue). Each worker handles one URL at a time. The Crawler and Fetcher parallelize first; Extractor scales to N workers (LLM rate limits are the practical ceiling).
 - **UI:** unchanged, talking to the same `answer.py` interface.
 
-**Migration path:** the change is concentrated in `storage/` and `pipeline/`. The extraction, analytics, and confidence layers are untouched.
+**Migration path:** the change is concentrated in `database/` and `pipeline/`. The extraction, analytics, and confidence layers are untouched.
 
 ### Phase 3 — Distributed, cloud-deployed
 

@@ -190,16 +190,19 @@ placementiq/
 ├── README.md              # Project landing page (this file)
 ├── docs/                  # Design-first documentation
 │   ├── project.md         # SRS + product design (the single source of truth)
-│   ├── database.md        # Schema, dedup, versioned records       (in progress)
-│   ├── architecture.md    # Module boundaries and runtime         (in progress)
-│   ├── agents.md          # LLM extraction, schema, verifier      (in progress)
-│   ├── roadmap.md         # Milestone breakdown                   (in progress)
-│   └── CLAUDE.md          # Contributor onboarding                (in progress)
+│   ├── database.md        # Schema, dedup, versioned records
+│   ├── architecture.md    # Module boundaries and runtime
+│   ├── agents.md          # Per-component contracts (extraction, routing, etc.)
+│   ├── roadmap.md         # Milestone breakdown
+│   └── CLAUDE.md          # Contributor onboarding
 ├── src/                   # Source code (follows Milestone 0)
 │   └── placementiq/
-│       ├── ingestion/     # Crawler, Fetcher, Parser, SourceAdapter
-│       ├── extraction/    # LLM extraction, validation
-│       ├── analytics/     # Analytics engine + Confidence Engine
+│       ├── agents/        # Ingestion, extraction, analytics — see docs/architecture.md
+│       ├── database/      # DB init, repositories, persistence, migrations
+│       ├── models/        # Shared Pydantic models — the cross-module type contract
+│       ├── pipeline/      # Offline orchestrator
+│       ├── settings/      # Per-component settings modules
+│       ├── common/        # Cross-cutting utilities
 │       └── ui/            # Streamlit app
 └── tests/                 # Test suite (follows Milestone 0)
 ```
