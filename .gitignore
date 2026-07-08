@@ -1,7 +1,6 @@
 # ===========================
 # Virtual Environment
 # ===========================
-
 .venv/
 
 # ===========================
@@ -22,15 +21,16 @@ logs/*
 !logs/.gitkeep
 
 # ===========================
-# Runtime Data
+# Generated Database
 # ===========================
-data/raw/*
-!data/raw/.gitkeep
-
-data/processed/*
-!data/processed/.gitkeep
+data/placementiq.db
 
 # ===========================
 # macOS
 # ===========================
 .DS_Store
+
+# ===========================
+# Packaging
+# ===========================
+*.egg-info/

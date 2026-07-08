@@ -1,0 +1,55 @@
+{
+    "generated_at": "2026-07-08T14:14:32.383170",
+    "total_interviews": 101,
+    "total_companies": 32,
+    "companies": [
+        "Amazon",
+        "Aqr Capital",
+        "Aveva",
+        "Bny Mellon",
+        "Chronus",
+        "Cisco",
+        "Citrix",
+        "D.E. Shaw",
+        "Deutsche Bank",
+        "Disney+ Hotstar",
+        "Gep",
+        "Goldman Sachs",
+        "John Deere",
+        "Kla Tencor",
+        "Kla Tensor",
+        "Mastercard",
+        "Microsoft",
+        "Morgan Stanley",
+        "Natwest",
+        "Npci",
+        "Nvidia",
+        "Okta",
+        "Oracle",
+        "Phonepe",
+        "Qualcomm",
+        "Salesforce",
+        "Samsung",
+        "Texas Instruments",
+        "Uber",
+        "Visa",
+        "Warner Bros. Discovery",
+        "Wells Fargo"
+    ],
+    "experience_types": [
+        "Intern",
+        "Placement"
+    ],
+    "batches": [
+        "2017-2021",
+        "2019-2023",
+        "2022-26",
+        "2023-27",
+        "2024-28"
+    ],
+    "status_counts": {
+        "accepted": 67,
+        "Pending": 33,
+        "Rejected": 1
+    }
+}

@@ -8,3 +8,9 @@ version = "0.1.0"
 description = "AI-powered placement intelligence platform"
 readme = "README.md"
 requires-python = ">=3.14"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
