@@ -97,7 +97,7 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS structured_experiences (
 
-                    id TEXT PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     interview_id TEXT NOT NULL,
 
@@ -178,13 +178,15 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS coding_questions (
 
-                    id TEXT PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     structured_experience_id TEXT NOT NULL,
 
                     title TEXT,
 
                     topic TEXT,
+
+                    concepts JSON,
 
                     difficulty TEXT,
 
@@ -227,7 +229,7 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS subject_questions (
 
-                    id TEXT PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     structured_experience_id TEXT NOT NULL,
 
@@ -262,7 +264,7 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS sql_questions (
 
-                    id TEXT PRIMARY KEY,
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     structured_experience_id TEXT NOT NULL,
 
@@ -295,7 +297,7 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS puzzles (
 
-                    id TEXT PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     structured_experience_id TEXT NOT NULL,
 
@@ -319,8 +321,7 @@ class DatabaseSchema:
                 "ON puzzles (structured_experience_id)"
             )
             cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_puzzles_title "
-                "ON puzzles (title)"
+                "CREATE INDEX IF NOT EXISTS idx_puzzles_title ON puzzles (title)"
             )
 
             # ``hr_questions`` stores HR and behavioural questions.
@@ -330,13 +331,15 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS hr_questions (
 
-                    id TEXT PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     structured_experience_id TEXT NOT NULL,
 
                     question TEXT,
 
                     type TEXT,
+
+                    round TEXT,
 
                     evidence TEXT,
 
@@ -363,7 +366,7 @@ class DatabaseSchema:
                 """
                 CREATE TABLE IF NOT EXISTS interview_rounds (
 
-                    id TEXT PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                     structured_experience_id TEXT NOT NULL,
 
@@ -399,3 +402,9 @@ class DatabaseSchema:
 
         finally:
             connection.close()
+
+
+if __name__ == "__main__":
+    schema = DatabaseSchema()
+    schema.create_database()
+    print("PlacementIQ database created successfully.")

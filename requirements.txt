@@ -9,7 +9,7 @@ h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
 idna==3.18
--e git+https://github.com/akshaykumarkorepu/PlacementIQ.git@7d442baa7b3f3c767ec8ca25d52403e64ff6bce6#egg=placementiq
+-e git+https://github.com/akshaykumarkorepu/PlacementIQ.git@e302d069daee5dc73f822a071674d22812acd109#egg=placementiq
 pydantic==2.13.4
 pydantic_core==2.46.4
 python-dotenv==1.2.2

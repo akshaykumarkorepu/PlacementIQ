@@ -94,3 +94,8 @@ class SQLiteLoader:
         finally:
             connection.close()
             print("Database connection closed.")
+
+
+if __name__ == "__main__":
+    loader = SQLiteLoader()
+    loader.load()
