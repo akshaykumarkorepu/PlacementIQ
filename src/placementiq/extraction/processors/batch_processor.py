@@ -60,9 +60,10 @@ class BatchProcessor:
                 WHERE id NOT IN (
                    SELECT interview_id
                    FROM structured_experiences
-            )
-            LIMIT 20
-            """
+                )
+                ORDER BY id
+                LIMIT 20  
+                """
             )
 
             interviews = cursor.fetchall()
