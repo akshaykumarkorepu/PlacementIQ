@@ -23,13 +23,14 @@ class AgentState(TypedDict):
     intent: str
     companies: list[str]
     topics: list[str]
+    search_category: str
     execution_plan: list[str]
 
     # ==========================
     # Tool Outputs
     # ==========================
 
-    retrieval_result: list[dict[str, Any]]
+    retrieval_result: dict[str, list[dict[str, Any]]]
     analytics_result: dict[str, Any]
     search_result: list[dict[str, Any]]
     comparison_result: dict[str, Any]

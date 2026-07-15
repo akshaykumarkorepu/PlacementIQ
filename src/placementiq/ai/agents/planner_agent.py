@@ -91,10 +91,11 @@ class PlannerAgent:
             # Update AgentState
             # ------------------------------------
 
-            state["intent"] = planning["intent"]
-            state["companies"] = planning["companies"]
-            state["topics"] = planning["topics"]
-            state["execution_plan"] = planning["execution_plan"]
+            state["intent"] = planning.get("intent", "")
+            state["companies"] = planning.get("companies", [])
+            state["topics"] = planning.get("topics", [])
+            state["search_category"] = planning.get("search_category", "")
+            state["execution_plan"] = planning.get("execution_plan", [])
 
             return state
 
