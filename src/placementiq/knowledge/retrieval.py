@@ -231,3 +231,127 @@ class RetrievalService:
         )
 
         return self.repository.get_puzzles(cleaned_company)
+
+    def search_coding_questions(self, keyword: str) -> list[dict]:
+        """
+        Search coding questions across ALL companies
+        using a keyword.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of matching coding question dictionaries.
+            Each result includes the company name.
+            Returns an empty list if the keyword is empty
+            or no records match.
+        """
+
+        cleaned_keyword = keyword.strip()
+
+        if not cleaned_keyword:
+            logger.info(
+                "Skipping retrieval: empty keyword provided."
+            )
+            return []
+
+        logger.info(
+            "Globally retrieving coding questions for keyword: %s",
+            cleaned_keyword,
+        )
+
+        return self.repository.search_coding_questions(cleaned_keyword)
+
+    def search_subject_questions(self, keyword: str) -> list[dict]:
+        """
+        Search subject questions across ALL companies
+        using a keyword.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of matching subject question dictionaries.
+            Each result includes the company name.
+            Returns an empty list if the keyword is empty
+            or no records match.
+        """
+
+        cleaned_keyword = keyword.strip()
+
+        if not cleaned_keyword:
+            logger.info(
+                "Skipping retrieval: empty keyword provided."
+            )
+            return []
+
+        logger.info(
+            "Globally retrieving subject questions for keyword: %s",
+            cleaned_keyword,
+        )
+
+        return self.repository.search_subject_questions(cleaned_keyword)
+
+    def search_sql_questions(self, keyword: str) -> list[dict]:
+        """
+        Search SQL questions across ALL companies
+        using a keyword.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of matching SQL question dictionaries.
+            Each result includes the company name.
+            Returns an empty list if the keyword is empty
+            or no records match.
+        """
+
+        cleaned_keyword = keyword.strip()
+
+        if not cleaned_keyword:
+            logger.info(
+                "Skipping retrieval: empty keyword provided."
+            )
+            return []
+
+        logger.info(
+            "Globally retrieving SQL questions for keyword: %s",
+            cleaned_keyword,
+        )
+
+        return self.repository.search_sql_questions(cleaned_keyword)
+
+    def search_hr_questions(self, keyword: str) -> list[dict]:
+        """
+        Search HR questions across ALL companies
+        using a keyword.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of matching HR question dictionaries.
+            Each result includes the company name.
+            Returns an empty list if the keyword is empty
+            or no records match.
+        """
+
+        cleaned_keyword = keyword.strip()
+
+        if not cleaned_keyword:
+            logger.info(
+                "Skipping retrieval: empty keyword provided."
+            )
+            return []
+
+        logger.info(
+            "Globally retrieving HR questions for keyword: %s",
+            cleaned_keyword,
+        )
+
+        return self.repository.search_hr_questions(cleaned_keyword)

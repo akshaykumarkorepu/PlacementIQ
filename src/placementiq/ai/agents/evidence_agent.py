@@ -16,6 +16,16 @@ class EvidenceAgent:
         topics = state.get("topics", [])
         search_category = state.get("search_category", "")
 
+        # When no companies were extracted, fall back to the
+        # companies discovered by the search step so global
+        # search flows still receive supporting evidence.
+
+        if not companies:
+            search_results = state.get("search_result") or {}
+            companies = [
+                company for company in search_results.keys() if company
+            ]
+
         if not companies:
             state["errors"].append("No companies found for evidence retrieval.")
             return state

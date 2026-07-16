@@ -10,11 +10,22 @@ class Settings:
         self.project_name = os.getenv("PROJECT_NAME", "PlacementIQ")
         self.debug = os.getenv("DEBUG", "false").lower() == "true"
 
-        self.database_path = os.getenv("DATABASE_PATH", "data/placementiq.sqlite")
+        self.database_path = os.getenv(
+            "DATABASE_PATH",
+            "data/placementiq.sqlite",
+        )
 
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
-        self.data_directory = os.getenv("DATA_DIRECTORY", "data")
+        self.data_directory = os.getenv(
+            "DATA_DIRECTORY",
+            "data",
+        )
+
+        # -----------------------------
+        # AI Configuration
+        # -----------------------------
+        self.groq_api_key = os.getenv("GROQ_API_KEY")
 
 
 settings = Settings()

@@ -16,10 +16,6 @@ class SearchAgent:
         topics = state.get("topics", [])
         search_category = state.get("search_category", "")
 
-        if not companies:
-            state["errors"].append("No companies found for search.")
-            return state
-
         if not topics:
             state["errors"].append("No search topics found.")
             return state
@@ -28,63 +24,25 @@ class SearchAgent:
             state["errors"].append("No search category found.")
             return state
 
-        search_results = {}
+        if companies:
+            logger_message = "Performing company-specific search."
+        else:
+            logger_message = "Performing global search across all companies."
 
-        for company in companies:
-            company_results = []
+        print(logger_message)
 
-            for topic in topics:
-                try:
-                    if search_category == "coding":
-                        results = self.search_service.search_coding_questions(
-                            company,
-                            topic,
-                        )
+        try:
+            search_results = self.search_service.search(
+                search_category,
+                companies,
+                topics,
+            )
 
-                    elif search_category == "subject":
-                        results = self.search_service.search_subject_questions(
-                            company,
-                            topic,
-                        )
-
-                    elif search_category == "sql":
-                        results = self.search_service.search_sql_questions(
-                            company,
-                            topic,
-                        )
-
-                    elif search_category == "hr":
-                        results = self.search_service.search_hr_questions(
-                            company,
-                            topic,
-                        )
-
-                    elif search_category == "rounds":
-                        results = self.search_service.search_rounds(
-                            company,
-                            topic,
-                        )
-
-                    elif search_category == "puzzles":
-                        results = self.search_service.search_puzzles(
-                            company,
-                            topic,
-                        )
-
-                    else:
-                        state["errors"].append(
-                            f"Unknown search category: {search_category}"
-                        )
-                        return state
-
-                    company_results.extend(results)
-
-                except Exception as e:
-                    state["errors"].append(
-                        f"Failed to search '{company}' for '{topic}': {e}"
-                    )
-
-            search_results[company] = company_results
+        except Exception as e:
+            state["errors"].append(
+                f"Search failed: {e}"
+            )
+            return state
 
         state["search_result"] = search_results
 

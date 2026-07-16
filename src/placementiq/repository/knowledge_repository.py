@@ -478,3 +478,290 @@ class KnowledgeRepository:
 
         finally:
             connection.close()
+
+    def search_coding_questions(self, keyword: str) -> list[dict]:
+        """
+        Search coding questions across ALL companies using a keyword.
+
+        The keyword is matched against the question
+        title, topic, concepts, and tags.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of dictionaries, one per matching coding
+            question. Each result includes the company name.
+            Returns an empty list if no records match.
+        """
+
+        connection = sqlite3.connect(self.database_path)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        try:
+            logger.info(
+                "Global search for coding questions using keyword: %s",
+                keyword,
+            )
+
+            cursor.execute(
+                """
+                SELECT
+                    cq.id,
+                    cq.structured_experience_id,
+                    se.company,
+                    cq.title,
+                    cq.topic,
+                    cq.concepts,
+                    cq.difficulty,
+                    cq.round,
+                    cq.platform,
+                    cq.tags,
+                    cq.evidence
+                FROM coding_questions AS cq
+                INNER JOIN structured_experiences AS se
+                    ON cq.structured_experience_id = se.id
+                WHERE LOWER(cq.title) LIKE ?
+                    OR LOWER(cq.topic) LIKE ?
+                    OR LOWER(IFNULL(cq.concepts, '')) LIKE ?
+                    OR LOWER(IFNULL(cq.tags, '')) LIKE ?
+                ORDER BY se.company, cq.id
+                """,
+                (
+                    f"%{keyword.lower()}%",
+                    f"%{keyword.lower()}%",
+                    f"%{keyword.lower()}%",
+                    f"%{keyword.lower()}%",
+                ),
+            )
+
+            rows = cursor.fetchall()
+
+            results = [dict(row) for row in rows]
+
+            logger.info(
+                "Found %d coding question(s) across all companies.",
+                len(results),
+            )
+
+            return results
+
+        except Exception:
+            logger.exception(
+                "Failed to globally search coding questions for keyword: %s",
+                keyword,
+            )
+            raise
+
+        finally:
+            connection.close()
+
+    def search_subject_questions(self, keyword: str) -> list[dict]:
+        """
+        Search subject questions across ALL companies using a keyword.
+
+        The keyword is matched against the subject
+        name and question text.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of dictionaries, one per matching subject
+            question. Each result includes the company name.
+            Returns an empty list if no records match.
+        """
+
+        connection = sqlite3.connect(self.database_path)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        try:
+            logger.info(
+                "Global search for subject questions using keyword: %s",
+                keyword,
+            )
+
+            cursor.execute(
+                """
+                SELECT
+                    sq.id,
+                    sq.structured_experience_id,
+                    se.company,
+                    sq.subject,
+                    sq.question,
+                    sq.round,
+                    sq.evidence
+                FROM subject_questions AS sq
+                INNER JOIN structured_experiences AS se
+                    ON sq.structured_experience_id = se.id
+                WHERE LOWER(sq.subject) LIKE ?
+                    OR LOWER(sq.question) LIKE ?
+                ORDER BY se.company, sq.id
+                """,
+                (
+                    f"%{keyword.lower()}%",
+                    f"%{keyword.lower()}%",
+                ),
+            )
+
+            rows = cursor.fetchall()
+
+            results = [dict(row) for row in rows]
+
+            logger.info(
+                "Found %d subject question(s) across all companies.",
+                len(results),
+            )
+
+            return results
+
+        except Exception:
+            logger.exception(
+                "Failed to globally search subject questions for keyword: %s",
+                keyword,
+            )
+            raise
+
+        finally:
+            connection.close()
+
+    def search_sql_questions(self, keyword: str) -> list[dict]:
+        """
+        Search SQL questions across ALL companies using a keyword.
+
+        The keyword is matched against the SQL
+        question text.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of dictionaries, one per matching SQL
+            question. Each result includes the company name.
+            Returns an empty list if no records match.
+        """
+
+        connection = sqlite3.connect(self.database_path)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        try:
+            logger.info(
+                "Global search for SQL questions using keyword: %s",
+                keyword,
+            )
+
+            cursor.execute(
+                """
+                SELECT
+                    sqlq.id,
+                    sqlq.structured_experience_id,
+                    se.company,
+                    sqlq.question,
+                    sqlq.round,
+                    sqlq.evidence
+                FROM sql_questions AS sqlq
+                INNER JOIN structured_experiences AS se
+                    ON sqlq.structured_experience_id = se.id
+                WHERE LOWER(sqlq.question) LIKE ?
+                ORDER BY se.company, sqlq.id
+                """,
+                (f"%{keyword.lower()}%",),
+            )
+
+            rows = cursor.fetchall()
+
+            results = [dict(row) for row in rows]
+
+            logger.info(
+                "Found %d SQL question(s) across all companies.",
+                len(results),
+            )
+
+            return results
+
+        except Exception:
+            logger.exception(
+                "Failed to globally search SQL questions for keyword: %s",
+                keyword,
+            )
+            raise
+
+        finally:
+            connection.close()
+
+    def search_hr_questions(self, keyword: str) -> list[dict]:
+        """
+        Search HR questions across ALL companies using a keyword.
+
+        The keyword is matched against the HR
+        question text and type.
+
+        Args:
+            keyword:
+                Search keyword.
+
+        Returns:
+            A list of dictionaries, one per matching HR
+            question. Each result includes the company name.
+            Returns an empty list if no records match.
+        """
+
+        connection = sqlite3.connect(self.database_path)
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+
+        try:
+            logger.info(
+                "Global search for HR questions using keyword: %s",
+                keyword,
+            )
+
+            cursor.execute(
+                """
+                SELECT
+                    hq.id,
+                    hq.structured_experience_id,
+                    se.company,
+                    hq.question,
+                    hq.type,
+                    hq.round,
+                    hq.evidence
+                FROM hr_questions AS hq
+                INNER JOIN structured_experiences AS se
+                    ON hq.structured_experience_id = se.id
+                WHERE LOWER(hq.question) LIKE ?
+                    OR LOWER(IFNULL(hq.type, '')) LIKE ?
+                ORDER BY se.company, hq.id
+                """,
+                (
+                    f"%{keyword.lower()}%",
+                    f"%{keyword.lower()}%",
+                ),
+            )
+
+            rows = cursor.fetchall()
+
+            results = [dict(row) for row in rows]
+
+            logger.info(
+                "Found %d HR question(s) across all companies.",
+                len(results),
+            )
+
+            return results
+
+        except Exception:
+            logger.exception(
+                "Failed to globally search HR questions for keyword: %s",
+                keyword,
+            )
+            raise
+
+        finally:
+            connection.close()

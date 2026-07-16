@@ -18,6 +18,27 @@ class ContextAgent:
         topics = state.get("topics", [])
         search_category = state.get("search_category", "")
 
+        # When no companies were extracted, fall back to the
+        # companies discovered by a previous step (search or
+        # analytics) so global search flows still receive
+        # per-company context.
+
+        if not companies:
+            search_results = state.get("search_result") or {}
+            analytics_results = state.get("analytics_result") or {}
+
+            discovered = []
+
+            for company in search_results.keys():
+                if company and company not in discovered:
+                    discovered.append(company)
+
+            for company in analytics_results.keys():
+                if company and company not in discovered:
+                    discovered.append(company)
+
+            companies = discovered
+
         if not companies:
             state["errors"].append("No companies found for context generation.")
             return state
