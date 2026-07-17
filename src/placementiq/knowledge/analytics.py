@@ -29,6 +29,13 @@ class AnalyticsService:
 
         self.retrieval_service = retrieval_service
 
+    def get_all_companies(self) -> list[str]:
+        """
+        Retrieve all companies available in the knowledge base.
+        """
+
+        return self.retrieval_service.get_all_companies()
+
     def get_topic_frequency(self, company: str) -> dict[str, int]:
         """
         Compute the frequency of coding topics
@@ -262,7 +269,9 @@ class AnalyticsService:
 
         experiences = self.retrieval_service.get_company_experiences(cleaned_company)
         coding_questions = self.retrieval_service.get_coding_questions(cleaned_company)
-        subject_questions = self.retrieval_service.get_subject_questions(cleaned_company)
+        subject_questions = self.retrieval_service.get_subject_questions(
+            cleaned_company
+        )
         sql_questions = self.retrieval_service.get_sql_questions(cleaned_company)
         hr_questions = self.retrieval_service.get_hr_questions(cleaned_company)
         rounds = self.retrieval_service.get_rounds(cleaned_company)
@@ -278,7 +287,9 @@ class AnalyticsService:
             "interview_rounds": len(rounds),
             "puzzles": len(puzzles),
             "topic_frequency": self.get_topic_frequency(cleaned_company),
-            "difficulty_distribution": self.get_difficulty_distribution(cleaned_company),
+            "difficulty_distribution": self.get_difficulty_distribution(
+                cleaned_company
+            ),
             "interview_pattern": self.get_interview_pattern(cleaned_company),
             "hr_question_frequency": self.get_hr_question_frequency(cleaned_company),
         }

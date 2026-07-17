@@ -3,6 +3,10 @@ from placementiq.knowledge.evidence import EvidenceService
 from placementiq.knowledge.retrieval import RetrievalService
 from placementiq.repository.knowledge_repository import KnowledgeRepository
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class EvidenceAgent:
     def __init__(self):
@@ -22,20 +26,18 @@ class EvidenceAgent:
 
         if not companies:
             search_results = state.get("search_result") or {}
-            companies = [
-                company for company in search_results.keys() if company
-            ]
+            companies = [company for company in search_results.keys() if company]
 
         if not companies:
-            state["errors"].append("No companies found for evidence retrieval.")
+            logger.info("Skipping EvidenceAgent: no companies available.")
             return state
 
         if not topics:
-            state["errors"].append("No evidence topics found.")
+            logger.info("Skipping EvidenceAgent: no topics available.")
             return state
 
         if not search_category:
-            state["errors"].append("No search category found.")
+            logger.info("Skipping EvidenceAgent: no search category available.")
             return state
 
         evidence_results = {}

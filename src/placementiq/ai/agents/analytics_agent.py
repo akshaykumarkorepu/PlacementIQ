@@ -15,8 +15,7 @@ class AnalyticsAgent:
         companies = state.get("companies", [])
 
         if not companies:
-            state["errors"].append("No companies found for analytics.")
-            return state
+            companies = self.analytics_service.get_all_companies()
 
         analytics_results = {}
 

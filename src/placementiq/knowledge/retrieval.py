@@ -46,9 +46,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -75,9 +73,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -104,9 +100,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -133,9 +127,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -162,9 +154,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -191,9 +181,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -220,9 +208,7 @@ class RetrievalService:
         cleaned_company = company.strip()
 
         if not cleaned_company:
-            logger.info(
-                "Skipping retrieval: empty company name provided."
-            )
+            logger.info("Skipping retrieval: empty company name provided.")
             return []
 
         logger.info(
@@ -231,6 +217,18 @@ class RetrievalService:
         )
 
         return self.repository.get_puzzles(cleaned_company)
+
+    def get_all_companies(self) -> list[str]:
+        """
+        Retrieve all unique companies present in the dataset.
+
+        Returns:
+           A sorted list of unique company names.
+        """
+
+        logger.info("Retrieving all companies from the knowledge base.")
+
+        return self.repository.get_all_companies()
 
     def search_coding_questions(self, keyword: str) -> list[dict]:
         """
@@ -251,9 +249,7 @@ class RetrievalService:
         cleaned_keyword = keyword.strip()
 
         if not cleaned_keyword:
-            logger.info(
-                "Skipping retrieval: empty keyword provided."
-            )
+            logger.info("Skipping retrieval: empty keyword provided.")
             return []
 
         logger.info(
@@ -282,9 +278,7 @@ class RetrievalService:
         cleaned_keyword = keyword.strip()
 
         if not cleaned_keyword:
-            logger.info(
-                "Skipping retrieval: empty keyword provided."
-            )
+            logger.info("Skipping retrieval: empty keyword provided.")
             return []
 
         logger.info(
@@ -313,9 +307,7 @@ class RetrievalService:
         cleaned_keyword = keyword.strip()
 
         if not cleaned_keyword:
-            logger.info(
-                "Skipping retrieval: empty keyword provided."
-            )
+            logger.info("Skipping retrieval: empty keyword provided.")
             return []
 
         logger.info(
@@ -344,9 +336,7 @@ class RetrievalService:
         cleaned_keyword = keyword.strip()
 
         if not cleaned_keyword:
-            logger.info(
-                "Skipping retrieval: empty keyword provided."
-            )
+            logger.info("Skipping retrieval: empty keyword provided.")
             return []
 
         logger.info(

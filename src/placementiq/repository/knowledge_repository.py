@@ -121,9 +121,7 @@ class KnowledgeRepository:
         cursor = connection.cursor()
 
         try:
-            logger.info(
-                "Fetching coding questions for company: %s", company
-            )
+            logger.info("Fetching coding questions for company: %s", company)
 
             cursor.execute(
                 """
@@ -187,9 +185,7 @@ class KnowledgeRepository:
         cursor = connection.cursor()
 
         try:
-            logger.info(
-                "Fetching subject questions for company: %s", company
-            )
+            logger.info("Fetching subject questions for company: %s", company)
 
             cursor.execute(
                 """
@@ -249,9 +245,7 @@ class KnowledgeRepository:
         cursor = connection.cursor()
 
         try:
-            logger.info(
-                "Fetching SQL questions for company: %s", company
-            )
+            logger.info("Fetching SQL questions for company: %s", company)
 
             cursor.execute(
                 """
@@ -310,9 +304,7 @@ class KnowledgeRepository:
         cursor = connection.cursor()
 
         try:
-            logger.info(
-                "Fetching HR questions for company: %s", company
-            )
+            logger.info("Fetching HR questions for company: %s", company)
 
             cursor.execute(
                 """
@@ -372,9 +364,7 @@ class KnowledgeRepository:
         cursor = connection.cursor()
 
         try:
-            logger.info(
-                "Fetching interview rounds for company: %s", company
-            )
+            logger.info("Fetching interview rounds for company: %s", company)
 
             cursor.execute(
                 """
@@ -436,9 +426,7 @@ class KnowledgeRepository:
         cursor = connection.cursor()
 
         try:
-            logger.info(
-                "Fetching puzzles for company: %s", company
-            )
+            logger.info("Fetching puzzles for company: %s", company)
 
             cursor.execute(
                 """
@@ -471,9 +459,47 @@ class KnowledgeRepository:
             return results
 
         except Exception:
-            logger.exception(
-                "Failed to fetch puzzles for company: %s", company
+            logger.exception("Failed to fetch puzzles for company: %s", company)
+            raise
+
+        finally:
+            connection.close()
+
+    def get_all_companies(self) -> list[str]:
+        """
+        Retrieve all unique companies present in the dataset.
+
+        Returns:
+           A sorted list of unique company names.
+        """
+
+        connection = sqlite3.connect(self.database_path)
+        cursor = connection.cursor()
+
+        try:
+            logger.info("Fetching all companies from the database.")
+
+            cursor.execute(
+                """
+               SELECT DISTINCT company
+               FROM structured_experiences
+               ORDER BY company
+               """
             )
+
+            rows = cursor.fetchall()
+
+            companies = [row[0] for row in rows]
+
+            logger.info(
+                "Found %d company(s).",
+                len(companies),
+            )
+
+            return companies
+
+        except Exception:
+            logger.exception("Failed to fetch company list.")
             raise
 
         finally:
